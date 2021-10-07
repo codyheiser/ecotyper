@@ -3,6 +3,7 @@ library(cluster)
 library(ggplot2)
 library(viridis)
 library(reshape2)
+library(maditr)
 source("lib/misc.R")
 source("lib/heatmaps.R")
 })
@@ -15,17 +16,17 @@ fractions = args[2]
 key_dir = file.path("../EcoTyper", dataset, fractions, "Analysis", "rank_selection")
 states_dir = file.path("../EcoTyper", dataset, fractions, "Cell_States", "discovery")
 output_dir = file.path("../EcoTyper", dataset, fractions, "Ecotypes", "discovery")
-dir.create(output_dir, recursive = T, showWarning = F) 
+dir.create(output_dir, recursive = T, showWarning = F)
 
 key = read.delim(file.path(key_dir, "rank_data.txt"))
 
 all_mapping = NULL
 all_classes = NULL
 all_classes_filt = NULL
-	
+
 for(cell_type in key[,1])
-{	
-	#print(cell_type) 
+{
+	#print(cell_type)
 	n_states = key[key[,1] == cell_type,2]
 
 	mapping_path = file.path(states_dir, cell_type, n_states, 'mapping_to_initial_states.txt')
@@ -33,14 +34,14 @@ for(cell_type in key[,1])
 	classes_filt_path = file.path(states_dir, cell_type, n_states, 'state_assignment.txt')
 
 	mapping = read.delim(mapping_path)
-	mapping = mapping[,c("State", "InitialState")] 
+	mapping = mapping[,c("State", "InitialState")]
 	mapping$CellType = cell_type
 	all_mapping = rbind(all_mapping, mapping)
 
-	classes = read.delim(classes_path)
+	classes = read.delim(classes_filt_path)
 	clinical = read_clinical(classes$ID, dataset = dataset)
 	classes$Sample = clinical$Sample
-	
+
 	classes = as.data.frame(table(classes$Sample, classes$State))
 	colnames(classes) = c("ID", "State", "Freq")
 	splits = split(classes, classes$ID)
@@ -54,19 +55,21 @@ for(cell_type in key[,1])
 	all_classes = rbind(all_classes, classes)
 }
 
-all_mapping$InitialID = paste(all_mapping$CellType, all_mapping$InitialState, sep = "_")
-all_mapping$ID = paste(all_mapping$CellType, all_mapping$State, sep = "_")
-write.table(all_mapping, file.path(output_dir, "mapping_all_states.txt"), sep = "\t", row.names = F)
+all_mapping$InitialID = paste(all_mapping$CellType, all_mapping$InitialState, sep = "___")
+all_mapping$ID = paste(all_mapping$CellType, all_mapping$State, sep = "___")
+write.table(all_mapping, file.path(output_dir, "mapping_all_states.txt"), sep = "\t")
+write.table(all_classes, file.path(output_dir, "mapping_all_classes.txt"), sep = "\t")
 
-casted = dcast(all_classes, ID ~ CellType + State, value.var = "Max")
+casted = maditr::dcast(all_classes, ID ~ CellType + State, sep="___", value.var = "Max")
+write.table(casted, file.path(output_dir, "casted.txt"), sep = "\t")
 #jaccard = cor(casted[,-1], use = "complete.obs")
-clusters = t(casted[,-1])
+clusters = t(casted[,-1])  # drops "ID" column and transposes
 clusters[is.na(clusters)] = 0
+clusters = clusters[match(all_mapping$ID, rownames(clusters)),]  # wow $InitialID to $ID
+write.table(clusters, file.path(output_dir, "clusters.txt"), sep = "\t")
+#rownames(clusters) = all_mapping$ID  # swapping initialID for new ID
 
-clusters = clusters[match(all_mapping$InitialID, rownames(clusters)),]
-rownames(clusters) = all_mapping$ID
-
-colnames(clusters) = casted[,1]
+colnames(clusters) <- casted$ID  # add column names as samples
 write.table(clusters, file.path(output_dir, "binary_classification_all_states.txt"), sep = "\t")
 
 jaccard = matrix(NA, nrow(clusters), nrow(clusters))
@@ -114,7 +117,7 @@ choose_clusters <- function(data, name, range = 2:10)
 	png(file.path(output_dir, paste0("nclusters_", name, ".png")), width = 4, height = 4, res = 300, units = "in")
 	plot(g2)
 	tmp = dev.off()
-	silh[which.max(silh$Silhouette), 1]	
+	silh[which.max(silh$Silhouette), 1]
 }
 hc = hclust(as.dist(1-jaccard), method = "average")
 n_clust = choose_clusters(jaccard, "jaccard", range = 2:(nrow(jaccard) - 1))
@@ -125,8 +128,9 @@ sil = silhouette(clust, as.dist(1-jaccard))
 avg_silhouette = summary(sil)
 write.table(avg_silhouette$avg.width, file.path(output_dir, "silhouette_initial.txt"), sep = "\t", row.names = F)
 
-top_ann = as.data.frame(t(sapply(rownames(jaccard), function(x) strsplit(x, "_")[[1]])))
+top_ann = as.data.frame(t(sapply(rownames(jaccard), function(x) strsplit(x, "___")[[1]])))
 colnames(top_ann) = c("CellType","State")
+print(head(top_ann))
 top_ann$InitialEcotype = as.factor(sprintf("IE%02d", clust))
 write.table(top_ann, file.path(output_dir, "initial_ecotypes.txt"), sep = "\t")
 
@@ -144,8 +148,7 @@ h <- heatmap_simple(jaccard, name = "ht1", top_annotation = top_ann, top_columns
  legend_name = "Jaccard index", width = unit(2, "in"), height = unit(2, "in"),
 color_palette = c("gray", viridis(4)), raster_quality = 5,
 color_range = c(0, 0.1, 0.2, 0.3))
-draw(h, heatmap_legend_side = "bottom", annotation_legend_side = "bottom", 
-	adjust_annotation_extension = T, merge_legends = T)	
+draw(h, heatmap_legend_side = "bottom", annotation_legend_side = "bottom", adjust_annotation_extension = T, merge_legends = T)
 
 ord = top_ann$InitialEcotype
 dup = (which(!duplicated(ord)) - 1)
@@ -170,7 +173,6 @@ top_ann = top_ann[order(top_ann$Ecotype),]
 write.table(top_ann, file.path(output_dir, "ecotypes.txt"), sep = "\t", row.names = F)
 
 jaccard = jaccard[match(top_ann$ID, rownames(jaccard)), match(top_ann$ID, rownames(jaccard))]
-
 sil <- silhouette(as.numeric(as.character(gsub("E", "", as.character(top_ann$Ecotype)))), as.dist(1-jaccard))
 avg_silhouette <<- summary(sil)
 write.table(avg_silhouette$avg.width, file.path(output_dir, "silhouette.txt"), sep = "\t", row.names = F)

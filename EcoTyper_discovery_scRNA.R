@@ -111,7 +111,7 @@ if(!2 %in% skip_steps)
 	}
 	RunJobQueue()
 
-	cat("Step 2 (cell state discovery on correrlation matrices): Aggregating NMF results...\n")
+	cat("Step 2 (cell state discovery on correlation matrices): Aggregating NMF results...\n")
 	for(cell_type in cell_types)
 	{
 		if(!file.exists(file.path("../EcoTyper", discovery, fractions, "Cell_States", "discovery_cross_cor", cell_type, "expression_top_genes_scaled.txt")))
@@ -144,11 +144,11 @@ if(!4 %in% skip_steps)
 
 	key = read.delim(file.path("../EcoTyper", discovery, fractions, "Analysis", "rank_selection", "rank_data.txt"))
 	for(cell_type in key[,1])
-	{	
+	{
 		cat(paste("Extracting cell states information for:", cell_type, "\n"))
 		n_clusters = key[key[,1] == cell_type, 2]
 		PushToJobQueue(paste("Rscript state_discovery_initial_plots_scRNA.R", "discovery_cross_cor", discovery, fractions, cell_type, n_clusters, "State", paste(additional_columns, collapse = " "))) 		 
-	}	
+	}
 	RunJobQueue()
 	cat("Step 4 (extracting cell state information) finished successfully!\n")
 }else{
@@ -161,7 +161,7 @@ if(!5 %in% skip_steps)
 
 	key = read.delim(file.path("../EcoTyper", discovery, fractions, "Analysis", "rank_selection", "rank_data.txt"))
 	for(cell_type in key[,1])
-	{	
+	{
 		cat(paste("Extracting marker genes for cell states defined in:", cell_type, "\n"))
 		n_clusters = key[key[,1] == cell_type, 2]
 		PushToJobQueue(paste("Rscript state_discovery_extract_features_scRNA.R", discovery, fractions, cell_type, n_clusters))
@@ -215,7 +215,7 @@ if(!6 %in% skip_steps)
 	{
 		cat(paste("Extracting cell states information for:", cell_type, "\n"))
 		n_clusters = key[key[,1] == cell_type, 2]
-		PushToJobQueue(paste("Rscript state_discovery_initial_plots.R", "discovery", discovery, fractions, cell_type, n_clusters, "State", paste(additional_columns, collapse = " "))) 		 
+		PushToJobQueue(paste("Rscript state_discovery_initial_plots.R", "discovery", discovery, fractions, cell_type, n_clusters, "State", paste(additional_columns, collapse = " ")))
 	}
 	RunJobQueue()
 	cat("Step 6 (extracting information for re-discovered cell states) finished successfully!\n")
@@ -246,8 +246,8 @@ if(!8 %in% skip_steps)
 	PushToJobQueue(paste("Rscript ecotypes_scRNA.R", discovery, fractions))
 	RunJobQueue()
 	PushToJobQueue(paste("Rscript ecotypes_assign_samples_scRNA.R", discovery, fractions, "State",paste(additional_columns, collapse = " ")))
-	cat("Step 8 (ecotype discovery) finished successfully!\n")
 	RunJobQueue()
+	cat("Step 8 (ecotype discovery) finished successfully!\n")
 }else{
 	cat("Skipping step 8 (ecotype discovery)...\n")
 }

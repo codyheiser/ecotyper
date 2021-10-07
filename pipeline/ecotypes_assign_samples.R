@@ -35,7 +35,7 @@ all_H = NULL
 all_classes_filt = NULL
 for(cell_type in key[,1])
 {	
-	#print(cell_type) 
+	#print(cell_type)
 	n_clusters = key[key[,1] == cell_type,2]
 	classes = read.delim(file.path(states_dir, cell_type, n_clusters, 'state_abundances.txt'))
 	rownames(classes) = paste0(cell_type, "_", rownames(classes))

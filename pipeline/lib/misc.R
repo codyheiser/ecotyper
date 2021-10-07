@@ -124,6 +124,7 @@ scale_data <- function(data, by = NULL)
 }
 
 
+
 read_clinical <- function(sample_list, dataset = "Lung", dataset_type = "discovery", row_names = T, first_10 = F)
 {
 	

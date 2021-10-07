@@ -85,14 +85,14 @@ write.table(H, file.path(output_dir, "state_abundances.txt"), sep = "\t")
 classes$InitialState = as.factor(as.character(classes$State))
 classes$State = as.factor(as.character(mapping[as.character(classes$State)]))
 classes = classes[order(classes$State),]
-write.table(classes, file.path(output_dir, "state_assignment.txt"), sep = "\t")
+write.table(classes, file.path(output_dir, "state_assignment.txt"), sep = "\t", row.names = F)
 
 data = raw_data
 data = data[,match(classes$ID, colnames(data))]
 
 clinical = read_clinical(colnames(data), dataset = dataset, dataset_type = "discovery")
 top_ann = merge(clinical, classes, by = "ID", all.y = T)
-rownames(top_ann) = top_ann$ID 
+rownames(top_ann) = top_ann$ID
 
 top_ann = top_ann[match(colnames(data), top_ann$ID),]
 write.table(top_ann, file.path(output_dir, "heatmap_top_ann.txt"), sep = "\t")

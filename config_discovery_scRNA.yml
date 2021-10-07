@@ -19,7 +19,7 @@ default :
     #   step 6 (extracting information for re-discovered cell states)
     #   step 7 (cell state QC filter)
     #   step 8 (ecotype discovery)
-    Pipeline steps to skip : [1, 2, 3, 4]
+    Pipeline steps to skip : [1, 2, 3, 4, 5, 6, 7]
     Filter non cell type specific genes : True
     Number of threads : 10
     Number of NMF restarts : 10

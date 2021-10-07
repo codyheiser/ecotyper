@@ -3,17 +3,17 @@ library(cluster)
 library(ggplot2)
 library(viridis)
 library(reshape2)
+library(maditr)
 source("lib/misc.R")
 source("lib/heatmaps.R")
 })
 
 #args = c("discovery_scRNA_lung", "Cell_type_specific_genes", "Ecotype")
-args = commandArgs(T) 
+args = commandArgs(T)
 dataset = args[1]
 fractions = args[2]
 fraction_processing = args[3]
 top_cols = args[4:length(args)]
-
 
 if(is.na(top_cols[1]))
 {
@@ -35,15 +35,16 @@ ecotypes = ecotypes[order(ecotypes$Ecotype),]
 all_H = NULL
 all_classes_filt = NULL
 for(cell_type in key[,1])
-{	
-	#print(cell_type) 
+{
+	#print(cell_type)
 	n_clusters = key[key[,1] == cell_type,2]
 	mapping = read.delim(file.path(states_dir, cell_type, n_clusters, 'mapping_to_initial_states.txt'))
+	print(paste0("Reading classes from ",file.path(states_dir, cell_type, n_clusters, 'initial_state_assignment.txt')))
 	classes = read.delim(file.path(states_dir, cell_type, n_clusters, 'initial_state_assignment.txt'))
 	clinical = read_clinical(classes$ID, dataset = dataset)
 	classes$Sample = clinical$Sample
-	
 	classes = as.data.frame(table(classes$Sample, classes$State))
+
 	colnames(classes) = c("ID", "State", "Freq")
 	splits = split(classes, classes$ID)
 	classes = do.call(rbind, lapply(splits, function(spl)
@@ -53,16 +54,16 @@ for(cell_type in key[,1])
 		spl
 		}))
 	classes$CellType = cell_type
-	
-	H = dcast(classes, State~ID, value.var = "Frac")
-	rownames(H)  = H[,1]
+
+	H = maditr::dcast(classes, State~ID, value.var = "Frac", sep="___")
+	rownames(H) = H$State
 	H = H[,-1]
 	H_raw = H
 	H =H[match(mapping$InitialState, rownames(H)),]
 	rownames(H) = mapping$State
 
-	rownames(H) = paste0(cell_type, "_", rownames(H))
-	all_H = rbind(all_H, H)
+	rownames(H) = paste0(cell_type, "____", rownames(H))
+	all_H = rbind(all_H, H, fill=T)
 
 	classes = as.data.frame(apply(H_raw, 2, function(x) {
 		idx = which.max(x)
@@ -91,8 +92,8 @@ for(cell_type in key[,1])
 	}else{
 		all_classes_filt = merge(all_classes_filt, classes, by = 'ID', all = T)
 	}
-} 
-
+}
+write.table(all_H, file.path(output_dir, "combined_state_abundances.txt"), sep = "\t")
 all_H = all_H[match(ecotypes$ID, rownames(all_H)),]
 write.table(all_H, file.path(output_dir, "combined_state_abundances.txt"), sep = "\t")
 
@@ -122,12 +123,12 @@ p_vals = do.call(rbind, lapply(levels(ecotypes$Ecotype), function(clst){
 		}, error = function(x) err <<- T)
 		if(err)
 		{
-			p = NA 
+			p = NA
 		}
 		p
 	})
 	
-})) 
+}))
 rownames(p_vals) = levels(ecotypes$Ecotype)
 write.table(p_vals, file.path(output_dir, "assignment_p_vals.txt"), sep = "\t")
 
@@ -138,12 +139,12 @@ assignment = as.data.frame(apply(H, 2, function(x) {
 		"Unassigned"
 	}else{
 		rownames(H)[idx]
-	}	
+	}
 }))
 
 clinical = data.frame(ID = rownames(assignment), MaxEcotype = assignment[,1])
 clinical$AssignmentP = sapply(1:ncol(H), function(i) {
-	p_vals[which.max(H[,i]), i] 
+	p_vals[which.max(H[,i]), i]
 	})
 clinical$AssignmentQ = p.adjust(clinical$AssignmentP, method = "BH")
 
