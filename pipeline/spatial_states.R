@@ -6,7 +6,7 @@ library(ComplexHeatmap)
 source("lib/misc.R")
 })
 
-args = c("Carcinoma", "VisiumBreast", "Carcinoma_Fractions", "Epithelial.cells")
+#args = c("Carcinoma", "VisiumBreast", "Carcinoma_Fractions", "Epithelial.cells")
 args = commandArgs(T)
 
 discovery = args[1]

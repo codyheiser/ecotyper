@@ -7,7 +7,7 @@ source("lib/misc.R")
 source("lib/heatmaps.R")
 })
 
-args = c("discovery_scRNA_lung", "Cell_type_specific_genes", "Ecotype")
+#args = c("discovery_scRNA_lung", "Cell_type_specific_genes", "Ecotype")
 args = commandArgs(T) 
 dataset = args[1]
 fractions = args[2]

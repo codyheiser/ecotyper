@@ -2,8 +2,8 @@ suppressPackageStartupMessages({
 library(NMF)
 })
 
-args = c("discovery", "MyDiscovery", "Carcinoma", "Epithelial.cells", "20", "5")
-args = commandArgs(T) 
+#args = c("discovery", "MyDiscovery", "Carcinoma", "Epithelial.cells", "20", "5")
+args = commandArgs(T)
 
 dataset_type = args[1]
 dataset = args[2]

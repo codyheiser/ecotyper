@@ -3,8 +3,8 @@ library(doParallel)
 library(NMF)
 })
 
-args = c("discovery", "scRNA_CRC_Park", "scRNA_specific_genes", "CD4.T.cells", "7", "2")
-args = commandArgs(T) 
+#args = c("discovery", "scRNA_CRC_Park", "scRNA_specific_genes", "CD4.T.cells", "7", "2")
+args = commandArgs(T)
 dataset_type = args[1]
 dataset = args[2]
 fractions = args[3]

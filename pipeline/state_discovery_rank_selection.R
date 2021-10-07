@@ -5,11 +5,11 @@ library(ggplot2)
 library(cowplot)
 source("lib/misc.R")
 })
- 
-args = c("discovery_cross_cor", "discovery_scRNA_CRC", "scRNA_specific_genes", "20", "0.95")
-args = commandArgs(T)   
+
+#args = c("discovery_cross_cor", "discovery_scRNA_CRC", "scRNA_specific_genes", "20", "0.95")
+args = commandArgs(T)
 dataset_type=args[1]
-dataset = args[2] 
+dataset = args[2]
 fractions = args[3]
 max_n_clusters = as.integer(as.character(args[4]))
 min_cophenetic = as.numeric(as.character(args[5]))

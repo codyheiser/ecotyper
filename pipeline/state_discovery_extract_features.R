@@ -7,7 +7,7 @@ args = commandArgs(T)
 dataset = args[1]
 fractions = args[2]
 cell_type = args[3]
-scaling_column = args[4] 
+scaling_column = args[4]
 filter_genes = args[5]
 
 if(is.na(filter_genes))

@@ -4,16 +4,16 @@ library(HiClimR)
 source("lib/misc.R")
 })
 
-args = c("scRNA_CRC_Park", "scRNA_specific_genes", "B.cells", "TRUE") 
-args = commandArgs(T)  
+#args = c("scRNA_CRC_Park", "scRNA_specific_genes", "B.cells", "TRUE") 
+args = commandArgs(T)
 dataset = args[1]
 fractions = args[2]
 cell_type = args[3]
 filter_genes = as.logical(args[4])
-scaling_column = args[5] 
+scaling_column = args[5]
 
 dataset_type = "discovery"
- 
+
 dataset_dir = file.path("../datasets/discovery", dataset) 
 
 input_dir = file.path("../EcoTyper", dataset, fractions, "Analysis", "Cell_type_specific_genes")
@@ -45,12 +45,13 @@ log_data = log2(raw_input + 1)
 write.table(log_data, file.path(output_dir, "expression_full_matrix_log2.txt"), sep = "\t", row.names = T)
 
 clinical = read_clinical(colnames(log_data), dataset = dataset, dataset_type = "discovery")
-if(is.na(scaling_column)) 
-{
-	by = NULL
-}else{
-	by = as.character(clinical[,scaling_column])
-}
+#if(is.null(scaling_column))
+#{
+#	by = NULL
+#}else{
+#	by = as.character(clinical[,scaling_column])
+#}
+by = NULL
 
 scaled_data = scale_data(log_data, by = by)
 scaled_data[is.na(scaled_data)] = 0
@@ -64,7 +65,7 @@ if(filter_genes)
 		stop(paste0("List of cell type specific genes not found for cell type '", cell_type, "'. Please make sure that step 1 finished sucessfully!\n"))
 	}
 	gene_info = read.delim(file.path(input_dir, paste0(cell_type, "_cell_type_specific_genes.txt")))
-	gene_info = gene_info[gene_info$CellType == cell_type,]
+	#gene_info = gene_info[gene_info$CellType == cell_type,]  # what's the point of this?
 	scaled_data = scaled_data[rownames(scaled_data) %in% gene_info$Gene,]
 }else{
 	cat(paste0("Not filtering '", cell_type, "' profiles for cell type specific genes, using the full transcriptome...\n"))

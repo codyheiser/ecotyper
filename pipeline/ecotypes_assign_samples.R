@@ -6,7 +6,7 @@ source("lib/misc.R")
 source("lib/heatmaps.R")
 })
 
-args = c("Lung", "TR12", "Ecotype", "Histology", "Tissue")
+#args = c("Lung", "TR12", "Ecotype", "Histology", "Tissue")
 args = commandArgs(T) 
 dataset = args[1]
 fractions = args[2]

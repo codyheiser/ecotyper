@@ -6,9 +6,9 @@ source("lib/misc.R")
 source("lib/heatmaps.R")
 })
 
-args = c("discovery_scRNA_CRC", "scRNA_specific_genes", "TCGA_COAD_tpm.fullIDs.remapped")
-args = c("discovery_scRNA_Lambrechts", "scRNA_specific_genes",  "TCGA_LUAD_tpm.fullIDs.remapped") 
-args = commandArgs(T) 
+#args = c("discovery_scRNA_CRC", "scRNA_specific_genes", "TCGA_COAD_tpm.fullIDs.remapped")
+#args = c("discovery_scRNA_Lambrechts", "scRNA_specific_genes",  "TCGA_LUAD_tpm.fullIDs.remapped") 
+args = commandArgs(T)
 dataset = args[1]
 fractions = args[2]
 test_dataset = args[3]

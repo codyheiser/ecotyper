@@ -3,7 +3,7 @@ library(data.table)
 source("lib/misc.R")
 })
 
-args = c("scRNA_CRC_Park", "scRNA_specific_genes", "CD4.T.cells", 7) 
+#args = c("scRNA_CRC_Park", "scRNA_specific_genes", "CD4.T.cells", 7) 
 args = commandArgs(T)
 dataset = args[1] 
 fractions = args[2]

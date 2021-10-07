@@ -3,15 +3,15 @@ library(data.table)
 source("lib/misc.R")
 })
 
-args = c("scRNA_CRC_Park", "scRNA_specific_genes", "B.cells") 
-args = commandArgs(T)  
+#args = c("scRNA_CRC_Park", "scRNA_specific_genes", "B.cells")  # wtf is this?
+args = commandArgs(T)
 dataset = args[1]
 fractions = args[2]
 cell_type = args[3]
-scaling_column = args[4] 
+scaling_column = args[4]
 
 dataset_type = "discovery"
- 
+
 input_dir = file.path("../datasets", dataset_type, dataset) 
 output_dir = file.path("../EcoTyper", dataset, fractions, "Analysis", "Cell_type_specific_genes") 
 dir.create(output_dir, recursive = T, showWarning = F)
@@ -52,13 +52,15 @@ raw_input = raw_input[,colnames(raw_input) %in% annotation$ID]
 
 log_data = log2(raw_input + 1)
 
+
 clinical = read_clinical(colnames(log_data), dataset = dataset, dataset_type = "discovery")
-if(is.na(scaling_column)) 
-{
-	by = NULL
-}else{
-	by = as.character(clinical[,scaling_column])
-}
+#if(is.null(scaling_column))
+#{
+#	by = NULL
+#}else{
+#	by = as.character(clinical[,scaling_column])
+#}
+by = NULL
 
 scaled_data = scale_data(log_data, by = by)
 scaled_data[is.na(scaled_data)] = 0

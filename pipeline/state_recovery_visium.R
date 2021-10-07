@@ -7,7 +7,7 @@ source("lib/scRNA.R")
 source("lib/ecotyper.R")
 })
 
-args = commandArgs(T) 
+args = commandArgs(T)
 dataset = args[1]
 fractions = args[2]
 cell_type = args[3]

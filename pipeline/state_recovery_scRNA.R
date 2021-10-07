@@ -7,8 +7,8 @@ source("lib/scRNA.R")
 source("lib/ecotyper.R")
 })
 
-args = c("Carcinoma", "Carcinoma_Fractions", "Epithelial.cells", "8", "single_cell_test_data", "FALSE")
-args = commandArgs(T) 
+#args = c("Carcinoma", "Carcinoma_Fractions", "Epithelial.cells", "8", "single_cell_test_data", "FALSE")
+args = commandArgs(T)
 dataset = args[1]
 fractions = args[2]
 cell_type = args[3]

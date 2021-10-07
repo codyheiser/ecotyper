@@ -6,8 +6,8 @@ source("lib/misc.R")
 source("lib/heatmaps.R")
 })
 
-args = c("MyDiscovery", "Carcinoma")
-args = commandArgs(T)  
+#args = c("MyDiscovery", "Carcinoma")
+args = commandArgs(T)
 dataset = args[1]
 fractions = args[2]
 

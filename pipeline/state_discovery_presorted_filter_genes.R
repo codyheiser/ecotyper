@@ -3,8 +3,8 @@ library(data.table)
 source("lib/misc.R")
 })
 
-args = c("PresortedDiscovery", "scRNA_all_genes", "B.cells") 
-args = commandArgs(T)  
+#args = c("PresortedDiscovery", "scRNA_all_genes", "B.cells") 
+args = commandArgs(T)
 discovery = args[1]
 fractions = args[2]
 to_test_cell_type = args[3]

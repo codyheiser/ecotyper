@@ -95,7 +95,7 @@ scale_data <- function(data, by = NULL)
 	}else{
 		variable = by
 	}
-	
+
 	df = data.frame(ID = colnames(data), Variable = variable)
 	splits = split(df, as.character(df$Variable))
 	reconstituted_data = NULL
@@ -105,7 +105,7 @@ scale_data <- function(data, by = NULL)
 		{
 			next
 		}
-	 
+
 		#print(paste0("Scaling across: ", spl$Variable[1]))
 		tmp_data = data[,colnames(data) %in% spl$ID, drop = F]
 		scaled = t(apply(tmp_data, 1, scale))
