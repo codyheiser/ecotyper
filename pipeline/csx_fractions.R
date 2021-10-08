@@ -1,7 +1,7 @@
 library(data.table)
 source("lib/misc.R")
 
-args = c("discovery", "Lung", "LM22", "B_mode", "", "", F)
+#args = c("discovery", "Lung", "LM22", "B_mode", "", "", F)
 args = commandArgs(T) 
 
 dataset_type = args[1]
@@ -27,7 +27,7 @@ sigmatrix_path = file.path("../utils/signature_matrices", sigmatrix, sigmatrix)
 refsample_path = file.path("../utils/signature_matrices", sigmatrix, "data.txt")
 sourceGEPs_path = file.path("../utils/signature_matrices", sigmatrix, paste0(sigmatrix, "_sourceGEP.txt"))
 
-output_dir = file.path("../CIBERSORTx/fractions/", dataset_type, dataset, sigmatrix, id) 
+output_dir = file.path("../CIBERSORTx/fractions/", dataset_type, dataset, sigmatrix, id)
 dir.create(output_dir, recursive = T, showWarning = F)
 
 if(!filt_0)

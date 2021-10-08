@@ -17,7 +17,7 @@ cmd_line = "docker run \\
 				"
 cmd_line = gsub("<output_dir>", output_dir, cmd_line)
 cmd_line = gsub("<username>", username, cmd_line)
-cmd_line = gsub("<token>", token, cmd_line)	
+cmd_line = gsub("<token>", token, cmd_line)
 #print(cmd_line)
 err = system(cmd_line)
 if(err != 0)

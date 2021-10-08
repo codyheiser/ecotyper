@@ -87,7 +87,7 @@ if(fractions %in% c("Carcinoma_Fractions", "Lymphoma_Fractions") && !file.exists
 	cat("\nRunning CIBERSORTxFractions on the visium dataset...\n")
 	PushToJobQueue(paste("Rscript csx_fractions.R", "visium", recovery, "LM22", "B_mode", CSx_username, CSx_token, TRUE))
 	RunJobQueue()
-	PushToJobQueue(paste("Rscript csx_fractions.R", "visium", recovery, "TR4", "B_mode", CSx_username, CSx_token, TRUE))			
+	PushToJobQueue(paste("Rscript csx_fractions.R", "visium", recovery, "TR4", "B_mode", CSx_username, CSx_token, TRUE))
 	RunJobQueue()
 	PushToJobQueue(paste("Rscript csx_fractions_two_tiered.R", "visium", recovery, "TR4", "B_mode", "LM22", "B_mode", fractions))
 	RunJobQueue()
@@ -101,7 +101,7 @@ if(fractions %in% c("Carcinoma_Fractions", "Lymphoma_Fractions") && !file.exists
 		
 	dir.create(file.path("../CIBERSORTx/fractions/visium", recovery, fractions), recursive = T, showWarnings = F)
 	PushToJobQueue(paste("cp -f", fractions_path, file.path("../CIBERSORTx/fractions/visium", recovery, fractions, "CIBERSORTx_Adjusted.txt")))
-	RunJobQueue()		
+	RunJobQueue()
 }
 
 cat("\nRunning cell state recovery on the visium dataset...\n")
