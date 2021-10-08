@@ -8,6 +8,8 @@ source("lib/misc.R")
 source("lib/heatmaps.R")
 })
 
+baseR.replace <- function(x) { replace(x, is.na(x), 0) }
+
 #args = c("discovery_scRNA_lung", "Cell_type_specific_genes", "Ecotype")
 args = commandArgs(T)
 dataset = args[1]
@@ -20,6 +22,7 @@ if(is.na(top_cols[1]))
 	top_cols = c("Ecotype")
 }
 top_cols = unique(c(top_cols, "Ecotype"))
+
 
 key_dir = file.path("../EcoTyper", dataset, fractions, "Analysis", "rank_selection")
 states_dir = file.path("../EcoTyper", dataset, fractions, "Cell_States", "discovery")
@@ -56,34 +59,36 @@ for(cell_type in key[,1])
 	classes$CellType = cell_type
 
 	H = maditr::dcast(classes, State~ID, value.var = "Frac", sep="___")
-	rownames(H) = H$State
-	H = H[,-1]
-	H_raw = H
-	H =H[match(mapping$InitialState, rownames(H)),]
-	rownames(H) = mapping$State
+	#row.names(H) <- H[,1]  # why doesn't this work ?
+	#H = H[,-1]
+	H_raw = H  # this bitch doesn't have rownames
+	#H = H[match(mapping$InitialState, row.names(H)),]
+	H = H[match(mapping$InitialState, H$State),]
+	#row.names(H) = mapping$State
+	H$State = mapping$State
 
-	rownames(H) = paste0(cell_type, "____", rownames(H))
+	#row.names(H) = paste0(cell_type, "___", row.names(H))  # this shit is fucking empty
+	H$State = paste0(cell_type, "___", H$State)
 	all_H = rbind(all_H, H, fill=T)
 
-	classes = as.data.frame(apply(H_raw, 2, function(x) {
+	classes = as.data.frame(apply(H_raw[,-1], 2, function(x) {
 		idx = which.max(x)
 		if(length(idx)== 0)
 		{
 			"Unassigned"
 		}else{
-			rownames(H_raw)[idx]
+			H_raw$State[idx]
 		}
 		
 	}
-		))
+	))
 	classes_raw = data.frame(ID = rownames(classes), InitialState = classes[,1])
 	classes_raw = classes_raw[classes_raw$InitialState %in% mapping$InitialState,]
 	classes_raw$State = mapping[match(classes_raw$InitialState, mapping$InitialState), "State"]
-	classes = classes_raw
-	classes = classes[,c("ID", "State")]
-	clusters = ecotypes[ecotypes$CellType == cell_type,] 
+	classes = classes_raw[,c("ID", "State")]
+	clusters = ecotypes[ecotypes$CellType == cell_type,]
 	classes = classes[classes$State %in% clusters$State,]
-	
+
 	colnames(classes) = c('ID', cell_type)
 
 	if(is.null(all_classes_filt))
@@ -93,21 +98,24 @@ for(cell_type in key[,1])
 		all_classes_filt = merge(all_classes_filt, classes, by = 'ID', all = T)
 	}
 }
-write.table(all_H, file.path(output_dir, "combined_state_abundances.txt"), sep = "\t")
-all_H = all_H[match(ecotypes$ID, rownames(all_H)),]
+all_H = all_H[match(ecotypes$ID, all_H$State),]
 write.table(all_H, file.path(output_dir, "combined_state_abundances.txt"), sep = "\t")
 
 H = do.call(rbind, lapply(levels(ecotypes$Ecotype), function(clst){
 	clst <<- clst
 	#print(clst)
 	inc <<- ecotypes[ecotypes$Ecotype == clst,]$ID
-	apply(all_H[rownames(all_H) %in% inc,,drop = F], 2, mean, na.rm = T)
+	apply(all_H[all_H$State %in% inc,-1,drop = F], 2, mean, na.rm = T)
 }))
 
 rownames(H) = levels(ecotypes$Ecotype)
 #write.table(H, file.path(output_dir, "ecotype_abundance.txt"), sep = "\t")
 H = apply(H, 2, function(x) x / sum(x, na.rm = T))
 write.table(H, file.path(output_dir, "ecotype_abundance.txt"), sep = "\t")
+
+all_H <- as.matrix(all_H)
+rownames(all_H) <- all_H[,1]
+all_H <- all_H[,-1]
 
 p_vals = do.call(rbind, lapply(levels(ecotypes$Ecotype), function(clst){
 	clst <<- clst
@@ -159,8 +167,10 @@ H = H[,match(clinical$ID, colnames(H))]
 all_H = all_H[,match(clinical$ID, colnames(all_H))]
 all_H = all_H[match(ecotypes$ID, rownames(all_H)),]
 
+clinical <- apply(clinical,2,as.character)
 write.table(clinical, file.path(output_dir, "initial_ecotype_assignment.txt"), sep = "\t")
 
+clinical <- as.data.frame(clinical)
 clinical_filt = clinical[clinical$Ecotype != "Unassigned",]
 write.table(clinical_filt, file.path(output_dir, "ecotype_assignment.txt"), sep = "\t")
 
@@ -171,62 +181,65 @@ clinical = cbind(clinical, tmp)
 rownames(clinical) = clinical$ID
 rownames(ecotypes) = ecotypes$ID
 
+all_H = apply(baseR.replace(all_H), 2, function(x) as.numeric(as.character(x)))
 
-h <- heatmap_simple(all_H, top_annotation = clinical, top_columns = top_cols, 
-	left_annotation = ecotypes, left_columns = c("Ecotype", "CellType", "State"),
-	column_split = ifelse(clinical$Ecotype == "Unassigned", "Unassigned", "Assigned"),
-	width = unit(7, "in"), height = unit(4, "in"),
-	legend_name = "State abundance",
-	color_range = seq(0, quantile(as.matrix(all_H), .9, na.rm = T), length.out = 8), color_palette = c("white", viridis(8)), raster_quality = 5)
-
-pdf(file.path(output_dir, "heatmap_all_samples.pdf"), width = 12, height = 7)
-draw(h, heatmap_legend_side = "bottom", annotation_legend_side = "bottom", merge_legends = T)	
-tmp = dev.off()
+#h <- heatmap_simple(all_H, top_annotation = clinical, top_columns = top_cols, 
+#	left_annotation = ecotypes, left_columns = c("Ecotype", "CellType", "State"),
+#	column_split = ifelse(clinical$Ecotype == "Unassigned", "Unassigned", "Assigned"),
+#	width = unit(7, "in"), height = unit(4, "in"),
+#	legend_name = "State abundance",
+#	color_range = seq(0, quantile(as.matrix(all_H), .9, na.rm = T), length.out = 8),
+#	color_palette = c("white", viridis(8)),
+#	raster_quality = 5)
+#
+#pdf(file.path(output_dir, "heatmap_all_samples.pdf"), width = 12, height = 7)
+#draw(h, heatmap_legend_side = "bottom", annotation_legend_side = "bottom", merge_legends = T)	
+#tmp = dev.off()
 
 small_H = as.matrix(all_H[,match(clinical_filt$ID, colnames(all_H))])
-rownames(clinical_filt)= clinical_filt$ID
-h = heatmap_simple(small_H, top_annotation = clinical_filt, top_columns = top_cols, 
-	left_annotation = ecotypes, left_columns = c("Ecotype", "CellType", "State"),
-	width = unit(5, "in"), height = unit(3, "in"),
-	legend_name = "State abundance",
-	color_range = seq(0, quantile(as.matrix(all_H), .9, na.rm = T), length.out = 8), color_palette = c("gray", viridis(8)), raster_quality = 20)
-
-pdf(file.path(output_dir, "heatmap_assigned_samples_viridis.pdf"), width = 8, height = 6)
-draw(h, heatmap_legend_side = "bottom", annotation_legend_side = "bottom", merge_legends = T)	
-#draw(h1, heatmap_legend_side = "bottom", annotation_legend_side = "bottom", merge_legends = T)	
-suppressWarnings({
-rect = rectangle_annotation_coordinates(ecotypes$Ecotype, clinical_filt$Ecotype)
-})
-decorate_heatmap_body("hmap", {
-    grid.rect(x = unit(rect$x, "native"), y = unit(rect$y, "native"), width = unit(rect$w, "native"), height = unit(rect$h, "native"), hjust = 0, vjust = 1, gp = gpar(col = "white", fill = NA, lty = 1, lwd = 3))
-})
-tmp = dev.off()
-
-png(file.path(output_dir, "heatmap_assigned_samples_viridis.png"), width = 8, height = 6, units = "in", res = 300)
-draw(h, heatmap_legend_side = "bottom", annotation_legend_side = "bottom", merge_legends = T)	
-decorate_heatmap_body("hmap", {
-	grid.rect(x = unit(rect$x, "native"), y = unit(rect$y, "native"), width = unit(rect$w, "native"), height = unit(rect$h, "native"), hjust = 0, vjust = 1, gp = gpar(col = "white", fill = NA, lty = 1, lwd = 3)) 
-})
-tmp = dev.off()
-
-h = heatmap_simple(small_H, top_annotation = clinical_filt, top_columns = top_cols, 
-	left_annotation = ecotypes, left_columns = c("Ecotype", "CellType", "State"),
-	width = unit(5, "in"), height = unit(3, "in"), 
-	legend_name = "State abundance",
-	color_range = c(seq(0, quantile(small_H, .8, na.rm = T), length.out = 8)), color_palette = c("gray", brewer.pal(8, "YlGnBu")), raster_quality = 20)
-
-pdf(file.path(output_dir, "heatmap_assigned_samples_YlGnBu.pdf"), width = 8, height = 6)
-draw(h, heatmap_legend_side = "bottom", annotation_legend_side = "bottom", merge_legends = T)	
-decorate_heatmap_body("hmap", {
-    grid.rect(x = unit(rect$x, "native"), y = unit(rect$y, "native"), width = unit(rect$w, "native"), height = unit(rect$h, "native"), hjust = 0, vjust = 1, gp = gpar(col = "white", fill = NA, lty = 1, lwd = 3))
-})
-tmp = dev.off()
-
-png(file.path(output_dir, "heatmap_assigned_samples_YlGnBu.png"), width = 8, height = 6, units = "in", res = 300)
-draw(h, heatmap_legend_side = "bottom", annotation_legend_side = "bottom", merge_legends = T)	
-decorate_heatmap_body("hmap", {
-    grid.rect(x = unit(rect$x, "native"), y = unit(rect$y, "native"), width = unit(rect$w, "native"), height = unit(rect$h, "native"), hjust = 0, vjust = 1, gp = gpar(col = "white", fill = NA, lty = 1, lwd = 3))
-})
-tmp = dev.off()
-
-
+#small_H = baseR.replace(small_H)
+#rownames(clinical_filt)= clinical_filt$ID
+#h = heatmap_simple(small_H, top_annotation = clinical_filt, top_columns = top_cols, 
+#	left_annotation = ecotypes, left_columns = c("Ecotype", "CellType", "State"),
+#	width = unit(5, "in"), height = unit(3, "in"),
+#	legend_name = "State abundance",
+#	color_range = seq(0, quantile(as.matrix(all_H), .9, na.rm = T), length.out = 8), color_palette = c("gray", viridis(8)), raster_quality = 20)
+#
+#pdf(file.path(output_dir, "heatmap_assigned_samples_viridis.pdf"), width = 8, height = 6)
+#draw(h, heatmap_legend_side = "bottom", annotation_legend_side = "bottom", merge_legends = T)
+#
+#suppressWarnings({
+#rect = rectangle_annotation_coordinates(ecotypes$Ecotype, clinical_filt$Ecotype)
+#})
+#decorate_heatmap_body("hmap", {
+#    grid.rect(x = unit(rect$x, "native"), y = unit(rect$y, "native"), width = unit(rect$w, "native"), height = unit(rect$h, "native"), hjust = 0, vjust = 1, gp = gpar(col = "white", fill = NA, lty = 1, lwd = 3))
+#})
+#tmp = dev.off()
+#
+#png(file.path(output_dir, "heatmap_assigned_samples_viridis.png"), width = 8, height = 6, units = "in", res = 300)
+#draw(h, heatmap_legend_side = "bottom", annotation_legend_side = "bottom", merge_legends = T)
+#decorate_heatmap_body("hmap", {
+#	grid.rect(x = unit(rect$x, "native"), y = unit(rect$y, "native"), width = unit(rect$w, "native"), height = unit(rect$h, "native"), hjust = 0, vjust = 1, gp = gpar(col = "white", fill = NA, lty = 1, lwd = 3)) 
+#})
+#tmp = dev.off()
+#
+#h = heatmap_simple(small_H, top_annotation = clinical_filt, top_columns = top_cols,
+#	left_annotation = ecotypes, left_columns = c("Ecotype", "CellType", "State"),
+#	width = unit(5, "in"), height = unit(3, "in"),
+#	legend_name = "State abundance",
+#	color_range = c(seq(0, quantile(small_H, .8, na.rm = T), length.out = 8)), color_palette = c("gray", brewer.pal(8, "YlGnBu")), raster_quality = 20)
+#
+#pdf(file.path(output_dir, "heatmap_assigned_samples_YlGnBu.pdf"), width = 8, height = 6)
+#draw(h, heatmap_legend_side = "bottom", annotation_legend_side = "bottom", merge_legends = T)
+#decorate_heatmap_body("hmap", {
+#    grid.rect(x = unit(rect$x, "native"), y = unit(rect$y, "native"), width = unit(rect$w, "native"), height = unit(rect$h, "native"), hjust = 0, vjust = 1, gp = gpar(col = "white", fill = NA, lty = 1, lwd = 3))
+#})
+#tmp = dev.off()
+#
+#png(file.path(output_dir, "heatmap_assigned_samples_YlGnBu.png"), width = 8, height = 6, units = "in", res = 300)
+#draw(h, heatmap_legend_side = "bottom", annotation_legend_side = "bottom", merge_legends = T)
+#decorate_heatmap_body("hmap", {
+#    grid.rect(x = unit(rect$x, "native"), y = unit(rect$y, "native"), width = unit(rect$w, "native"), height = unit(rect$h, "native"), hjust = 0, vjust = 1, gp = gpar(col = "white", fill = NA, lty = 1, lwd = 3))
+#})
+#tmp = dev.off()
+#

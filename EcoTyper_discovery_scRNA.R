@@ -245,6 +245,7 @@ if(!8 %in% skip_steps)
 	cat("\nStep 8 (ecotype discovery)...\n")
 	PushToJobQueue(paste("Rscript ecotypes_scRNA.R", discovery, fractions))
 	RunJobQueue()
+
 	PushToJobQueue(paste("Rscript ecotypes_assign_samples_scRNA.R", discovery, fractions, "State",paste(additional_columns, collapse = " ")))
 	RunJobQueue()
 	cat("Step 8 (ecotype discovery) finished successfully!\n")
