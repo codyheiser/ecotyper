@@ -67,7 +67,7 @@ if(!discovery %in% c("Carcinoma", "Lymphoma"))
 				fractions = "All_genes"
 			}
 		}else{
-			fractions = "Custom"	
+			fractions = "Cell_type_specific_genes" #"Custom"
 		}
 	}
 }else{

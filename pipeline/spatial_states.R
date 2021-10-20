@@ -68,7 +68,7 @@ all_melted$Y = annotation[match(all_melted$ID, annotation$ID),"Y"]
 
 write.table(all_melted, file.path(output_dir, "state_abundances_long.txt"), sep = "\t", row.names = F)
 
-all_melted$State_ID = paste0(all_melted$CellType, "_", all_melted$State)
+all_melted$State_ID = paste0(all_melted$CellType, "___", all_melted$State)
 casted_data = dcast(all_melted, ID + X + Y + Sample + Malignant  ~ State_ID, value.var = "Abundance")
 write.table(casted_data, file.path(output_dir, "state_abundances.txt"), sep = "\t", row.names = F)
 
