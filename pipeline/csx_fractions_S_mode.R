@@ -11,7 +11,7 @@ cmd_line = "docker run \\
 				--username <username> --token <token>  \\
 				--mixture /src/data/mixture.txt \\
 				--sigmatrix /src/data/sigmatrix.txt \\
-				--refsample /src/data/refsample.txt \\				
+				--refsample /src/data/refsample.txt \\
 				--rmbatchSmode TRUE \\
 				--verbose TRUE
 				"
@@ -24,5 +24,3 @@ if(err != 0)
 {
 	stop()
 }
-
-

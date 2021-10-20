@@ -57,6 +57,7 @@ for(cell_type in key[,1])
 		spl
 		}))
 	classes$CellType = cell_type
+	classes <- as.data.frame(classes)
 
 	H = maditr::dcast(classes, State~ID, value.var = "Frac", sep="___")
 	#row.names(H) <- H[,1]  # why doesn't this work ?
@@ -174,15 +175,15 @@ clinical <- as.data.frame(clinical)
 clinical_filt = clinical[clinical$Ecotype != "Unassigned",]
 write.table(clinical_filt, file.path(output_dir, "ecotype_assignment.txt"), sep = "\t")
 
-tmp = read_clinical(clinical$ID, dataset = dataset)
-tmp = tmp[,!colnames(tmp) %in% colnames(clinical)]
-clinical = cbind(clinical, tmp)
-
-rownames(clinical) = clinical$ID
-rownames(ecotypes) = ecotypes$ID
-
-all_H = apply(baseR.replace(all_H), 2, function(x) as.numeric(as.character(x)))
-
+#tmp = read_clinical(clinical$ID, dataset = dataset)
+#tmp = tmp[,!colnames(tmp) %in% colnames(clinical)]
+#clinical = cbind(clinical, tmp)
+#
+#rownames(clinical) = clinical$ID
+#rownames(ecotypes) = ecotypes$ID
+#
+#all_H = apply(baseR.replace(all_H), 2, function(x) as.numeric(as.character(x)))
+#
 #h <- heatmap_simple(all_H, top_annotation = clinical, top_columns = top_cols, 
 #	left_annotation = ecotypes, left_columns = c("Ecotype", "CellType", "State"),
 #	column_split = ifelse(clinical$Ecotype == "Unassigned", "Unassigned", "Assigned"),
@@ -195,8 +196,8 @@ all_H = apply(baseR.replace(all_H), 2, function(x) as.numeric(as.character(x)))
 #pdf(file.path(output_dir, "heatmap_all_samples.pdf"), width = 12, height = 7)
 #draw(h, heatmap_legend_side = "bottom", annotation_legend_side = "bottom", merge_legends = T)	
 #tmp = dev.off()
-
-small_H = as.matrix(all_H[,match(clinical_filt$ID, colnames(all_H))])
+#
+#small_H = as.matrix(all_H[,match(clinical_filt$ID, colnames(all_H))])
 #small_H = baseR.replace(small_H)
 #rownames(clinical_filt)= clinical_filt$ID
 #h = heatmap_simple(small_H, top_annotation = clinical_filt, top_columns = top_cols, 

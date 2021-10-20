@@ -1,13 +1,13 @@
 default :
   Input :
-    Discovery dataset name : "discovery_scRNA_COLONMAP_200"
-    Expression matrix : "example_data/COLONMAP_200_discovery_data.txt"
-    Annotation file : "example_data/COLONMAP_200_discovery_annotation.txt"
+    Discovery dataset name : "discovery_scRNA_COLONMAP_500"
+    Expression matrix : "example_data/COLONMAP_500_discovery_data.txt"
+    Annotation file : "example_data/COLONMAP_500_discovery_annotation.txt"
     Annotation file column to scale by : NULL
     Annotation file column(s) to plot : ["PolypType"]
 
   Output :
-    Output folder : "DiscoveryOutput_scRNA_COLONMAP_200"
+    Output folder : "DiscoveryOutput_scRNA_COLONMAP_500"
 
   Pipeline settings :
     #Pipeline steps:
@@ -19,7 +19,7 @@ default :
     #   step 6 (extracting information for re-discovered cell states)
     #   step 7 (cell state QC filter)
     #   step 8 (ecotype discovery)
-    Pipeline steps to skip : []
+    Pipeline steps to skip : [1,2,3,4,5,6,7]
     Filter non cell type specific genes : True
     Number of threads : 12
     Number of NMF restarts : 10

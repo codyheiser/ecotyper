@@ -42,7 +42,7 @@ sig = sig[,colnames(sig) != "Eos"]
 
 if(output_signature == "Carcinoma_Fractions")
 {
-	colnames(sig)[which(colnames(sig) == "EPCAM")] = "Epithelial.cells"	
+	colnames(sig)[which(colnames(sig) == "EPCAM")] = "Epithelial.cells" 
 }else{
 	sig = sig[,colnames(sig) != "EPCAM"]
 }

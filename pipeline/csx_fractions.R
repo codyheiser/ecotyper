@@ -40,7 +40,7 @@ if(!filt_0)
 	}
 }else{
 	cat("Warning: Running CIBERSORTx on the subset of ST spots that contain expression for at least one gene in the signature matrix. This is necessary to prevent matrix singularity issues observed when running CIBERSORTx on very sparse data, as is the case with ST arrays!\n")
-	
+
 	data = fread(input_mixture, data.table = F)
 	sig = read.delim(file.path(sigmatrix_path))
 	small_data = data[data[,1] %in% sig[,1],]
