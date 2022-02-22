@@ -1,13 +1,13 @@
 default :
   Input :
-    Discovery dataset name : "discovery_scRNA_COLONMAP_500"
-    Expression matrix : "example_data/COLONMAP_500_discovery_data.txt"
-    Annotation file : "example_data/COLONMAP_500_discovery_annotation.txt"
+    Discovery dataset name : "discovery_scRNA_COLONMAP+"
+    Expression matrix : "example_data/COLONMAP+_discovery_data.txt"
+    Annotation file : "example_data/COLONMAP+_discovery_annotation.txt"
     Annotation file column to scale by : NULL
-    Annotation file column(s) to plot : ["PolypType"]
+    Annotation file column(s) to plot : []
 
   Output :
-    Output folder : "DiscoveryOutput_scRNA_COLONMAP_500"
+    Output folder : "DiscoveryOutput_scRNA_COLONMAP+"
 
   Pipeline settings :
     #Pipeline steps:
@@ -24,4 +24,4 @@ default :
     Number of threads : 12
     Number of NMF restarts : 10
     Maximum number of states per cell type : 18
-    Cophenetic coefficient cutoff : 0.95
+    Cophenetic coefficient cutoff : 0.96

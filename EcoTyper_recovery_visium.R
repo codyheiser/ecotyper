@@ -109,16 +109,16 @@ key = read.delim(file.path("../EcoTyper", discovery, fractions, "Analysis", "ran
 for(cell_type in key[,1])
 {
     n_states = key[key[,1] == cell_type, 2]
-    PushToJobQueue((paste("Rscript state_recovery_visium.R", discovery, fractions, cell_type, n_states, recovery, "FALSE"))) 
+    PushToJobQueue((paste("Rscript state_recovery_visium.R", discovery, fractions, cell_type, n_states, recovery, "FALSE")))
 }   
 RunJobQueue()
 
 cat("\nCalculating cell state abundances...\n")
 print(paste("Rscript spatial_states.R", discovery, recovery, fractions, coo))
-PushToJobQueue((paste("Rscript spatial_states.R", discovery, recovery, fractions, coo))) 
+PushToJobQueue((paste("Rscript spatial_states.R", discovery, recovery, fractions, coo)))
 RunJobQueue()
 cat("\nCalculating ecotype abundances...\n")
-PushToJobQueue((paste("Rscript spatial_ecotypes.R", discovery, recovery, fractions, coo))) 
+PushToJobQueue((paste("Rscript spatial_ecotypes.R", discovery, recovery, fractions, coo)))
 RunJobQueue()
 
 cat("\nPlotting cell state heatmaps...\n")

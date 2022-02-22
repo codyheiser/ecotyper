@@ -31,7 +31,7 @@ splits = split(casted, casted$Sample)
 
 ecotype_data = do.call(rbind, lapply(splits, function(spl)
 {
-	tmp = spl[,match(mapping$ID, colnames(spl))]	
+	tmp = spl[,match(mapping$ID, colnames(spl))]
 	tmp[is.na(tmp)] = 0
 	tmp[tmp > 1] = 1
 
