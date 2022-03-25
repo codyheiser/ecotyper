@@ -60,7 +60,7 @@ all_mapping$ID = paste(all_mapping$CellType, all_mapping$State, sep = "___")
 write.table(all_mapping, file.path(output_dir, "mapping_all_states.txt"), sep = "\t")
 write.table(all_classes, file.path(output_dir, "mapping_all_classes.txt"), sep = "\t")
 
-casted = maditr::dcast(all_classes, ID ~ CellType + State, sep="___", value.var = "Max")
+casted = maditr::dcast(as.data.frame(all_classes), ID ~ CellType + State, sep="___", value.var = "Max")
 write.table(casted, file.path(output_dir, "casted.txt"), sep = "\t")
 #jaccard = cor(casted[,-1], use = "complete.obs")
 clusters = t(casted[,-1])  # drops "ID" column and transposes
@@ -126,7 +126,7 @@ clust =  hclusCut(jaccard, n_clust)$cluster
 
 sil = silhouette(clust, as.dist(1-jaccard))
 avg_silhouette = summary(sil)
-write.table(avg_silhouette$avg.width, file.path(output_dir, "silhouette_initial.txt"), sep = "\t", row.names = F)
+write.table(avg_silhouette["avg.width"], file.path(output_dir, "silhouette_initial.txt"), sep = "\t", row.names = F)
 
 top_ann = as.data.frame(t(sapply(rownames(jaccard), function(x) strsplit(x, "___")[[1]])))
 colnames(top_ann) = c("CellType","State")
@@ -136,10 +136,10 @@ write.table(top_ann, file.path(output_dir, "initial_ecotypes.txt"), sep = "\t")
 
 top_ann$ID = rownames(top_ann)
 top_ann = top_ann[order(top_ann$InitialEcotype),]
-write.table(top_ann, file.path(output_dir, "ecotypes.txt"), sep = "\t", row.names = F)
+# don't know why they do this here and then again on line 173...
+#write.table(top_ann, file.path(output_dir, "ecotypes.txt"), sep = "\t", row.names = F)
 
 jaccard = jaccard[match(top_ann$ID, rownames(jaccard)), match(top_ann$ID, rownames(jaccard))]
-
 
 top_ann$"Cell type" = top_ann$CellType
 diag(jaccard) = 1
@@ -160,7 +160,7 @@ decorate_heatmap_body("ht1", {
 tmp = dev.off()
 
 tb = table(top_ann$InitialEcotype)
-tb = tb[tb > 2]
+tb = tb[tb > 1]  # ecotypes need at least 2 cell states; this was initially 3
 
 top_ann = top_ann[top_ann$InitialEcotype %in% names(tb),]
 
@@ -175,7 +175,7 @@ write.table(top_ann, file.path(output_dir, "ecotypes.txt"), sep = "\t", row.name
 jaccard = jaccard[match(top_ann$ID, rownames(jaccard)), match(top_ann$ID, rownames(jaccard))]
 sil <- silhouette(as.numeric(as.character(gsub("E", "", as.character(top_ann$Ecotype)))), as.dist(1-jaccard))
 avg_silhouette <<- summary(sil)
-write.table(avg_silhouette$avg.width, file.path(output_dir, "silhouette.txt"), sep = "\t", row.names = F)
+write.table(avg_silhouette["avg.width"], file.path(output_dir, "silhouette.txt"), sep = "\t", row.names = F)
 
 top_ann$"Cell type" = top_ann$CellType
 
