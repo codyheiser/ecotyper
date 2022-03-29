@@ -7,3 +7,16 @@
 .vscode/
 # R
 .Rhistory
+# ecotyper config files
+config_files/
+# outputs
+DiscoveryOutput/
+DiscoveryOutput_scRNA/
+VisiumOutput/
+DiscoveryOutput_scRNA_BROAD/
+DiscoveryOutput_scRNA_COLONMAP/
+DiscoveryOutput_scRNA_COLONMAP+/
+# datasets
+datasets/
+example_data/
+CIBERSORTx/
