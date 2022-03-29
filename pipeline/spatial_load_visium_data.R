@@ -38,11 +38,18 @@ barcode.names = read.delim(barcode.path,
                            header = FALSE,
                            stringsAsFactors = FALSE)
 colnames(mat) = barcode.names$V1
-rownames(mat) = feature.names$V1
+rownames(mat) = feature.names$V2
+
+# adding this for debugging DBiT-seq
+print(dim(feature.names))
+print(dim(mat))
 
 data = as.matrix(mat)
-data = data.frame(Gene = feature.names[match(rownames(data), feature.names$V1),]$V2, data)
+data = data.frame(Gene = feature.names[match(rownames(data), feature.names$V2),]$V2, data)
 data = data[!duplicated(data$Gene),]
+
+# adding this for debugging DBiT-seq
+print(dim(data))
 
 spatial_coords = read.delim(positions.path, sep = ",", header = F)
 spatial_coords$ID = paste0(make.names(spatial_coords[,1]))
